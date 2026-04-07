@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
-const client = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+const client = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
@@ -15,8 +15,8 @@ export async function generateBullet(rawInput, sectionName, existingBullets = []
       ? `Here are ${examples.length} existing bullets from the "${sectionName}" section for style reference:\n${examples.map((b, i) => `${i + 1}. ${b}`).join("\n")}`
       : `This is for the "${sectionName}" section. No existing bullets for reference.`;
 
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
     max_tokens: 300,
     messages: [
       {
@@ -40,8 +40,7 @@ Polished bullet:`,
     ],
   });
 
-  const text = message.content[0]?.text?.trim();
+  const text = response.choices[0]?.message?.content?.trim();
   if (!text) throw new Error("No response from AI");
-  // Strip any leading bullet characters
   return text.replace(/^[-•*]\s*/, "").trim();
 }

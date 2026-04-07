@@ -1,9 +1,9 @@
 import { useState } from "react";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { INTERNSHIPS } from "../utils/internshipData";
 
-const client = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+const client = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
@@ -28,8 +28,8 @@ export default function EventScanner({ onEventsFound }) {
       const companyNames = INTERNSHIPS.map((i) => i.company);
       const uniqueCompanies = [...new Set(companyNames)];
 
-      const message = await client.messages.create({
-        model: "claude-sonnet-4-20250514",
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
         max_tokens: 2000,
         messages: [
           {
@@ -65,7 +65,7 @@ Return ONLY the JSON array, no other text.`,
         ],
       });
 
-      const text = message.content[0]?.text?.trim();
+      const text = response.choices[0]?.message?.content?.trim();
       const parsed = JSON.parse(text);
       setResults(parsed);
     } catch (err) {
