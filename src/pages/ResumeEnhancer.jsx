@@ -6,6 +6,7 @@ import {
   loadLibrary,
   addBulletToSection,
   removeBulletFromSection,
+  renameSection,
   mergeIntoLibrary,
 } from "../utils/bulletStore";
 
@@ -113,6 +114,15 @@ export default function ResumeEnhancer() {
     [library, showNotif]
   );
 
+  const handleRenameSection = useCallback(
+    (oldName, newName) => {
+      const updated = renameSection(library, oldName, newName);
+      setLibrary({ ...updated });
+      showNotif(`Renamed "${oldName}" to "${newName}"`);
+    },
+    [library, showNotif]
+  );
+
   return (
     <>
       {notification && (
@@ -131,6 +141,7 @@ export default function ResumeEnhancer() {
           onAddToResume={handleAddToResume}
           onRemoveBullet={handleRemoveBullet}
           onSaveBullet={handleSaveBullet}
+          onRenameSection={handleRenameSection}
           sectionNames={sectionNames}
         />
       </main>

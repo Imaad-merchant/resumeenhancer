@@ -6,6 +6,7 @@ export default function BulletLibrary({
   onAddToResume,
   onRemoveBullet,
   onSaveBullet,
+  onRenameSection,
   sectionNames,
 }) {
   const [rawInput, setRawInput] = useState("");
@@ -15,6 +16,8 @@ export default function BulletLibrary({
   const [savedIndices, setSavedIndices] = useState(new Set());
   const [collapsedSections, setCollapsedSections] = useState({});
   const [error, setError] = useState("");
+  const [editingSection, setEditingSection] = useState(null);
+  const [editingName, setEditingName] = useState("");
 
   const sections = Object.keys(library);
   const allSections = [...new Set([...sections, ...sectionNames])].sort();
@@ -24,6 +27,25 @@ export default function BulletLibrary({
       ...prev,
       [section]: !prev[section],
     }));
+  };
+
+  const startRename = (e, section) => {
+    e.stopPropagation();
+    setEditingSection(section);
+    setEditingName(section);
+  };
+
+  const finishRename = () => {
+    if (editingSection && editingName.trim() && editingName.trim() !== editingSection) {
+      onRenameSection(editingSection, editingName.trim());
+    }
+    setEditingSection(null);
+    setEditingName("");
+  };
+
+  const handleRenameKeyDown = (e) => {
+    if (e.key === "Enter") finishRename();
+    if (e.key === "Escape") { setEditingSection(null); setEditingName(""); }
   };
 
   const handleGenerate = async () => {
@@ -102,15 +124,41 @@ export default function BulletLibrary({
                   >
                     <path d="M9 18l6-6-6-6" />
                   </svg>
-                  <h3>{section}</h3>
+                  {editingSection === section ? (
+                    <input
+                      className="section-rename-input"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onBlur={finishRename}
+                      onKeyDown={handleRenameKeyDown}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                  ) : (
+                    <h3>{section}</h3>
+                  )}
                 </div>
-                <span className="section-count">{library[section].length}</span>
+                <div className="section-header-right">
+                  {editingSection !== section && (
+                    <button
+                      className="btn-icon section-rename-btn"
+                      onClick={(e) => startRename(e, section)}
+                      title="Rename section"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                      </svg>
+                    </button>
+                  )}
+                  <span className="section-count">{library[section].length}</span>
+                </div>
               </div>
 
               {!collapsedSections[section] && (
                 <ul className="bullet-list">
                   {library[section].map((bullet, idx) => (
                     <li key={idx} className="bullet-item">
+                      <span className="bullet-number">{idx + 1}</span>
                       <span className="bullet-text">{bullet}</span>
                       <div className="bullet-actions">
                         <button

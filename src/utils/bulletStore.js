@@ -38,6 +38,16 @@ export function removeBulletFromSection(library, section, bullet) {
   return updated;
 }
 
+export function renameSection(library, oldName, newName) {
+  if (!newName.trim() || oldName === newName) return library;
+  const updated = {};
+  for (const [key, value] of Object.entries(library)) {
+    updated[key === oldName ? newName.trim() : key] = value;
+  }
+  saveLibrary(updated);
+  return updated;
+}
+
 export function mergeIntoLibrary(existing, incoming) {
   const merged = { ...existing };
   for (const [section, bullets] of Object.entries(incoming)) {

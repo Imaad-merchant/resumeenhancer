@@ -438,6 +438,40 @@ body,
   transform: rotate(90deg);
 }
 
+.section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-rename-btn {
+  color: var(--text-dim);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.section-header:hover .section-rename-btn {
+  opacity: 1;
+}
+
+.section-rename-btn:hover {
+  color: var(--accent);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.section-rename-input {
+  background: var(--bg-input);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  outline: none;
+  width: 160px;
+  font-family: inherit;
+}
+
 .section-count {
   font-size: 10px;
   color: var(--text-dim);
@@ -465,11 +499,28 @@ body,
   background: var(--bg-hover);
 }
 
+.bullet-number {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  background: var(--bg-input);
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
 .bullet-text {
   flex: 1;
   font-size: 11.5px;
   line-height: 1.5;
   color: #ccc;
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
 }
 
 .bullet-actions {
