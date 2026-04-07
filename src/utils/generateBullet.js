@@ -6,9 +6,9 @@ const client = new OpenAI({
 });
 
 /**
- * Generate a polished resume bullet from raw input, using existing bullets as style examples.
+ * Generate multiple polished resume bullets from raw input.
  */
-export async function generateBullet(rawInput, sectionName, existingBullets = []) {
+export async function generateBullets(rawInput, sectionName, existingBullets = [], count = 5) {
   const examples = existingBullets.slice(0, 3);
   const examplesText =
     examples.length > 0
@@ -17,30 +17,38 @@ export async function generateBullet(rawInput, sectionName, existingBullets = []
 
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
-    max_tokens: 300,
+    max_tokens: 1000,
     messages: [
       {
         role: "user",
-        content: `You are a resume writing expert. Polish the following rough bullet point into a professional resume bullet.
+        content: `You are a resume writing expert. Generate ${count} different polished resume bullet variations from the rough input below.
 
 Rules:
-- Start with a strong action verb
+- Each bullet starts with a DIFFERENT strong action verb
 - Quantify impact where possible (numbers, percentages, dollar amounts)
 - Match the tone, length, and style of the example bullets below
-- Return ONLY the single polished bullet point, nothing else
-- No bullet character prefix, just the text
+- Vary the angle: some focus on leadership, some on results, some on process
+- Return ONLY the bullets, one per line, numbered 1-${count}
+- No bullet character prefix on each line, just the number and text
 
 ${examplesText}
 
 Raw input to polish:
 "${rawInput}"
 
-Polished bullet:`,
+${count} bullet variations:`,
       },
     ],
   });
 
   const text = response.choices[0]?.message?.content?.trim();
   if (!text) throw new Error("No response from AI");
-  return text.replace(/^[-•*]\s*/, "").trim();
+
+  // Parse numbered lines
+  const bullets = text
+    .split("\n")
+    .map((line) => line.replace(/^\d+[\.\)]\s*/, "").replace(/^[-•*]\s*/, "").trim())
+    .filter((line) => line.length > 10);
+
+  return bullets.slice(0, count);
 }
