@@ -1,5 +1,6 @@
 const TASKS_KEY = "internship-tracker-tasks";
 const INIT_KEY = "internship-tracker-initialized-months";
+const VERSIONS_KEY = "internship-tracker-month-versions";
 
 export function loadTasks() {
   try {
@@ -23,12 +24,24 @@ function getInitializedMonths() {
   }
 }
 
-function markMonthInitialized(key) {
+function getMonthVersions() {
+  try {
+    const data = localStorage.getItem(VERSIONS_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch {
+    return {};
+  }
+}
+
+function markMonthInitialized(key, version) {
   const months = getInitializedMonths();
   if (!months.includes(key)) {
     months.push(key);
     localStorage.setItem(INIT_KEY, JSON.stringify(months));
   }
+  const versions = getMonthVersions();
+  versions[key] = version;
+  localStorage.setItem(VERSIONS_KEY, JSON.stringify(versions));
 }
 
 export function toggleTask(tasks, date, taskId) {
@@ -70,11 +83,20 @@ export function removeTask(tasks, date, taskId) {
   return updated;
 }
 
-export function initializeMonth(tasks, year, month, defaults, realEvents) {
+export function initializeMonth(tasks, year, month, defaults, realEvents, templateVersion = 1) {
   const key = `${year}-${month}`;
-  const initialized = getInitializedMonths();
-  if (initialized.includes(key)) return tasks;
+  // Months initialized before versioning existed count as version 1
+  const done = getMonthVersions()[key] ?? (getInitializedMonths().includes(key) ? 1 : 0);
+  if (done >= templateVersion) return tasks;
 
+  // Don't backfill new templates into past months
+  const now = new Date();
+  if (done > 0 && (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth()))) {
+    markMonthInitialized(key, templateVersion);
+    return tasks;
+  }
+
+  const templates = defaults.filter((t) => (t.since ?? 1) > done);
   const updated = { ...tasks };
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -86,7 +108,7 @@ export function initializeMonth(tasks, year, month, defaults, realEvents) {
     if (!updated[dateStr]) updated[dateStr] = [];
 
     // Add recurring tasks matching this week
-    const weekTasks = defaults.filter((t) => t.weekOfMonth === Math.min(weekOfMonth, 4));
+    const weekTasks = templates.filter((t) => t.weekOfMonth === Math.min(weekOfMonth, 4));
 
     // Spread tasks across days of the week (Mon-Fri)
     const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
@@ -109,7 +131,7 @@ export function initializeMonth(tasks, year, month, defaults, realEvents) {
   }
 
   // Add real fixed-date events (from terry.uga.edu, career.uga.edu, etc.)
-  if (realEvents) {
+  if (realEvents && done === 0) {
     const monthStr = String(month + 1).padStart(2, "0");
     const prefix = `${year}-${monthStr}`;
     for (const evt of realEvents) {
@@ -130,7 +152,7 @@ export function initializeMonth(tasks, year, month, defaults, realEvents) {
   }
 
   saveTasks(updated);
-  markMonthInitialized(key);
+  markMonthInitialized(key, templateVersion);
   return updated;
 }
 

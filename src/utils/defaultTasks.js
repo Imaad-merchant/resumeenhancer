@@ -10,7 +10,13 @@ export const CATEGORIES = {
   CORPORATE: { name: "Corporate Engagement", color: "#ef4444" },
   SKILLS: { name: "Skills & Certifications", color: "#22c55e" },
   CAMPUS_EVENT: { name: "Campus Event", color: "#06b6d4" },
+  COFFEE_CHATS: { name: "Coffee Chats", color: "#b45309" },
+  RESEARCH: { name: "Research", color: "#0d9488" },
 };
+
+// Bump when adding new templates; tag them with `since: TEMPLATE_VERSION`
+// so already-initialized current/future months get them backfilled.
+export const TEMPLATE_VERSION = 2;
 
 // Real UGA/Terry events for April 2026 (from terry.uga.edu + career.uga.edu)
 // These are added as fixed-date tasks, not recurring
@@ -109,4 +115,23 @@ export const DEFAULT_TASKS = [
   { id: "sk-6", title: "LinkedIn Learning: Business Development Foundations", category: "Skills & Certifications", color: "#22c55e", weekOfMonth: 3 },
   { id: "sk-7", title: "Practice with AdLoop platform for analytics skills", category: "Skills & Certifications", color: "#22c55e", weekOfMonth: 4 },
   { id: "sk-8", title: "Update skills section on resume with new certifications", category: "Skills & Certifications", color: "#22c55e", weekOfMonth: 4 },
+
+  // COFFEE CHATS - one per contact, spread across the month
+  { id: "cc-1", title: "Coffee chat: Thomas Edmunds (RMIN)", category: "Coffee Chats", color: "#b45309", weekOfMonth: 1, since: 2 },
+  { id: "cc-2", title: "Coffee chat: Sharmin (reach out on LinkedIn)", category: "Coffee Chats", color: "#b45309", weekOfMonth: 1, since: 2 },
+  { id: "cc-3", title: "Coffee chat: Robert Trotter", category: "Coffee Chats", color: "#b45309", weekOfMonth: 1, since: 2 },
+  { id: "cc-4", title: "Coffee chat: Jill's dad", category: "Coffee Chats", color: "#b45309", weekOfMonth: 2, since: 2 },
+  { id: "cc-5", title: "Coffee chat: RMIN speakers — follow up after talks", category: "Coffee Chats", color: "#b45309", weekOfMonth: 2, since: 2 },
+  { id: "cc-6", title: "Coffee chat: Fintech — Last Mile, Academy Director, Patrick Weight", category: "Coffee Chats", color: "#b45309", weekOfMonth: 2, since: 2 },
+  { id: "cc-7", title: "Coffee chat: Carys Hall", category: "Coffee Chats", color: "#b45309", weekOfMonth: 3, since: 2 },
+  { id: "cc-8", title: "Coffee chat: IPN summit speakers + search IPN network", category: "Coffee Chats", color: "#b45309", weekOfMonth: 3, since: 2 },
+  { id: "cc-9", title: "Coffee chat: UGA Mentor Program match", category: "Coffee Chats", color: "#b45309", weekOfMonth: 4, since: 2 },
+  { id: "cc-10", title: "Coffee chat: Professors Sundhar + Jennifer", category: "Coffee Chats", color: "#b45309", weekOfMonth: 4, since: 2 },
+
+  // RESEARCH - company / LinkedIn / Forage
+  { id: "rs-1", title: "Company research: 1 makeup + 1 airline cargo company — join their mailing lists", category: "Research", color: "#0d9488", weekOfMonth: 1, since: 2 },
+  { id: "rs-2", title: "LinkedIn research: find 3 procurement / vendor specialists at target companies", category: "Research", color: "#0d9488", weekOfMonth: 2, since: 2 },
+  { id: "rs-3", title: "Company research: 1 credit card + 1 consulting firm — join their mailing lists", category: "Research", color: "#0d9488", weekOfMonth: 3, since: 2 },
+  { id: "rs-4", title: "Forage: complete a supply chain, risk, or trade compliance virtual experience", category: "Research", color: "#0d9488", weekOfMonth: 4, since: 2 },
+  { id: "rs-5", title: "LinkedIn research: find production schedulers / ops interns in logistics & distribution", category: "Research", color: "#0d9488", weekOfMonth: 4, since: 2 },
 ];
