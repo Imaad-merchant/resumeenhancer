@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { loadInternships, saveInternships, updateInternshipStatus, updateInternshipNotes } from "../utils/internshipData";
+import { FOCUS_AREAS, TARGET_ROLES, TARGET_INDUSTRIES, INTERN_FUNCTIONS } from "../utils/careerProfile";
 
 const STATUS_OPTIONS = [
   { value: "not_started", label: "Not Started", color: "var(--text-dim)" },
@@ -22,6 +23,7 @@ export default function InternshipTracker() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState(null);
   const [editingNotes, setEditingNotes] = useState("");
+  const [focusOpen, setFocusOpen] = useState(true);
 
   const filtered = useMemo(() => {
     return internships.filter((i) => {
@@ -84,6 +86,47 @@ export default function InternshipTracker() {
           <span className="stat-label">Offers</span>
         </div>
       </div>
+
+      {/* My Focus */}
+      <section className="focus-panel">
+        <button className="focus-toggle" onClick={() => setFocusOpen((o) => !o)}>
+          My Focus <span className="focus-caret">{focusOpen ? "−" : "+"}</span>
+        </button>
+        {focusOpen && (
+          <div className="focus-body">
+            <div className="focus-row">
+              <span className="focus-label">Intern in</span>
+              <div className="focus-chips">
+                {INTERN_FUNCTIONS.map((f) => (
+                  <button key={f} className="focus-chip focus-chip-link" title={`Search roles for "${f}"`} onClick={() => setSearchQuery(f)}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="focus-row">
+              <span className="focus-label">Roles</span>
+              <div className="focus-chips">
+                {TARGET_ROLES.map((r) => <span key={r} className="focus-chip">{r}</span>)}
+              </div>
+            </div>
+            <div className="focus-row">
+              <span className="focus-label">Industries</span>
+              <div className="focus-chips">
+                {TARGET_INDUSTRIES.map((c) => <span key={c} className="focus-chip">{c}</span>)}
+              </div>
+            </div>
+            <div className="focus-areas">
+              {FOCUS_AREAS.map((a) => (
+                <div key={a.name} className="focus-area">
+                  <div className="focus-area-name">{a.name}</div>
+                  {a.topics.length > 0 && <div className="focus-area-topics">{a.topics.join(" · ")}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Filters */}
       <div className="tracker-filters">

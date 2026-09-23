@@ -3,7 +3,7 @@ import Calendar from "../components/Calendar";
 import TaskSidebar from "../components/TaskSidebar";
 import EventScanner from "../components/EventScanner";
 import { loadTasks, saveTasks, toggleTask, addCustomTask, removeTask, initializeMonth, formatDate } from "../utils/taskStore";
-import { DEFAULT_TASKS, REAL_EVENTS } from "../utils/defaultTasks";
+import { DEFAULT_TASKS, REAL_EVENTS, TEMPLATE_VERSION } from "../utils/defaultTasks";
 
 export default function CalendarPage() {
   const today = new Date();
@@ -17,7 +17,7 @@ export default function CalendarPage() {
 
   useEffect(() => {
     let t = loadTasks();
-    t = initializeMonth(t, currentYear, currentMonth, DEFAULT_TASKS, REAL_EVENTS);
+    t = initializeMonth(t, currentYear, currentMonth, DEFAULT_TASKS, REAL_EVENTS, TEMPLATE_VERSION);
     setTasks(t);
   }, [currentYear, currentMonth]);
 

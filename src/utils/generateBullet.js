@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { PROFILE_SUMMARY } from "./careerProfile";
 
 const client = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -28,6 +29,9 @@ Rules:
 - Quantify impact where possible (numbers, percentages, dollar amounts)
 - Match the tone, length, and style of the example bullets below
 - Vary the angle: some focus on leadership, some on results, some on process
+- Where it fits naturally, frame the work in language that resonates with the candidate's targets (sourcing, vendor management, risk, compliance, operations) — never invent experience
+
+Candidate's career targets: ${PROFILE_SUMMARY}
 - Return ONLY the bullets, one per line, numbered 1-${count}
 - No bullet character prefix on each line, just the number and text
 

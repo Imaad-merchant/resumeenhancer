@@ -1497,3 +1497,108 @@ body,
     flex-direction: column;
   }
 }
+
+/* My Focus panel (Internship Tracker) */
+.focus-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.focus-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.focus-caret {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.focus-body {
+  padding: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.focus-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.focus-label {
+  flex: 0 0 72px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.focus-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.focus-chip {
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.focus-chip-link {
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.focus-chip-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.focus-areas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.focus-area {
+  border-left: 3px solid var(--accent);
+  padding: 4px 10px;
+}
+
+.focus-area-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.focus-area-topics {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 600px) {
+  .focus-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
