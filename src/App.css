@@ -1759,3 +1759,65 @@ body,
   background: var(--green-bg);
   color: var(--green);
 }
+
+/* Google Sheet sync */
+.sync-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex: 0 0 8px;
+}
+
+.sync-ok .sync-dot { background: var(--green); }
+.sync-loading .sync-dot { background: var(--yellow); }
+.sync-error .sync-dot { background: var(--red); }
+.sync-error { color: var(--red); }
+
+.sync-refresh {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tracker-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tracker-edit-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tracker-followup {
+  color: var(--text-muted);
+}
+
+.tracker-followup.due {
+  color: var(--red);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .tracker-edit-grid {
+    grid-template-columns: 1fr;
+  }
+}

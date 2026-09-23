@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
-import { loadInternships, updateInternshipStatus, updateInternshipNotes, daysUntil, parseDate } from "../utils/internshipData";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { loadInternships, updateInternship, persistInternships, daysUntil, parseDate } from "../utils/internshipData";
+import { pullFromSheet, pushToSheet } from "../utils/sheetSync";
 import { CLASS_YEAR, FOCUS_AREAS, TARGET_ROLES, TARGET_INDUSTRIES, INTERN_FUNCTIONS, ROLE_SEARCH_BANK } from "../utils/careerProfile";
 
 const STATUS_OPTIONS = [
@@ -28,6 +29,8 @@ const LOCATION_FILTERS = {
   Chicago: /chicago|\bIL\b|bolingbrook/i,
   "National / Multiple": /national|multiple|u\.s\.|united states|global|remote/i,
 };
+
+const EMPTY_EDIT = { appliedOn: "", followUp: "", contact: "", nextAction: "", notes: "" };
 
 const TIER_ORDER = { "Tier 1": 0, "Tier 2": 1, Explore: 2 };
 
@@ -77,7 +80,8 @@ export default function InternshipTracker() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState(null);
-  const [editingNotes, setEditingNotes] = useState("");
+  const [editing, setEditing] = useState(EMPTY_EDIT);
+  const [sync, setSync] = useState({ state: "loading", msg: "" });
   const [focusOpen, setFocusOpen] = useState(false);
 
   const categories = useMemo(() => ["All", ...[...new Set(internships.map((i) => i.category))].sort()], [internships]);
@@ -106,23 +110,54 @@ export default function InternshipTracker() {
     return { live: live.length, dueSoon, applied, interviewing };
   }, [internships]);
 
-  const handleStatusChange = (id, status) => {
-    setInternships(updateInternshipStatus(internships, id, status));
+  const refreshFromSheet = useCallback(async () => {
+    setSync((s) => ({ ...s, state: "loading" }));
+    try {
+      const merged = await pullFromSheet(loadInternships());
+      persistInternships(merged);
+      setInternships(merged);
+      setSync({ state: "ok", msg: `Synced ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` });
+    } catch (err) {
+      setSync({ state: err.notConfigured ? "off" : "error", msg: err.notConfigured ? "Google Sheet sync not set up" : err.message });
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshFromSheet();
+  }, [refreshFromSheet]);
+
+  // Local update first, then write-through to the sheet
+  const saveFields = async (id, patch) => {
+    const updated = updateInternship(internships, id, patch);
+    setInternships(updated);
+    if (sync.state === "off") return;
+    const intern = updated.find((i) => i.id === id);
+    try {
+      const res = await pushToSheet(intern, patch);
+      if (res?.row) setInternships((list) => list.map((i) => (i.id === id ? { ...i, sheetRow: res.row } : i)));
+      setSync({ state: "ok", msg: `Saved to sheet ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` });
+    } catch (err) {
+      setSync({ state: err.notConfigured ? "off" : "error", msg: `Not saved to sheet: ${err.message}` });
+    }
   };
 
-  const handleNotesChange = (id) => {
-    setInternships(updateInternshipNotes(internships, id, editingNotes));
+  const handleStatusChange = (id, status) => saveFields(id, { status });
+
+  const handleSaveDetails = (id) => {
+    saveFields(id, editing);
     setExpandedId(null);
   };
 
-  const handleExpand = (id, currentNotes) => {
-    if (expandedId === id) {
+  const handleExpand = (intern) => {
+    if (expandedId === intern.id) {
       setExpandedId(null);
     } else {
-      setExpandedId(id);
-      setEditingNotes(currentNotes || "");
+      setExpandedId(intern.id);
+      setEditing(Object.fromEntries(Object.keys(EMPTY_EDIT).map((k) => [k, intern[k] || ""])));
     }
   };
+
+  const setEdit = (k) => (e) => setEditing((ed) => ({ ...ed, [k]: e.target.value }));
 
   const searchFor = (term) => {
     setSearchQuery(term);
@@ -134,6 +169,14 @@ export default function InternshipTracker() {
 
   return (
     <main className="tracker-page">
+      <div className={`sync-bar sync-${sync.state}`}>
+        <span className="sync-dot" />
+        <span>{sync.state === "loading" ? "Syncing with Google Sheet…" : sync.msg}</span>
+        {sync.state !== "loading" && sync.state !== "off" && (
+          <button className="sync-refresh" onClick={refreshFromSheet}>Refresh from sheet</button>
+        )}
+      </div>
+
       {/* Stats bar */}
       <div className="tracker-stats">
         <button className="stat-card stat-clickable" onClick={() => setKindFilter("opening")}>
@@ -274,7 +317,7 @@ export default function InternshipTracker() {
             const due = deadlineInfo(intern);
             return (
               <div key={intern.id} className={`tracker-card ${isExpanded ? "expanded" : ""} ${intern.kind === "target" ? "tracker-card-target" : ""}`}>
-                <div className="tracker-card-main" onClick={() => handleExpand(intern.id, intern.notes)}>
+                <div className="tracker-card-main" onClick={() => handleExpand(intern)}>
                   <div className="tracker-card-left">
                     <div className="tracker-company">
                       {intern.company}
@@ -294,6 +337,9 @@ export default function InternshipTracker() {
                       </span>
                       <span className="tracker-category-tag">{intern.category}</span>
                       <span className={`tracker-deadline due-${due.tone}`}>{due.label}</span>
+                      {intern.followUp && (
+                        <span className={`tracker-followup ${daysUntil(intern.followUp) <= 0 ? "due" : ""}`}>Follow up {formatDay(intern.followUp)}</span>
+                      )}
                     </div>
                   </div>
                   <div className="tracker-card-right">
@@ -317,16 +363,22 @@ export default function InternshipTracker() {
                       {intern.kind === "opening" && intern.keywords && (<><dt>Keywords</dt><dd>{intern.keywords}</dd></>)}
                       {intern.dateNotes && (<><dt>Dates</dt><dd>{intern.dateNotes}{intern.verifiedOn && ` (verified ${formatDay(intern.verifiedOn)})`}</dd></>)}
                     </dl>
+                    <div className="tracker-edit-grid">
+                      <label>Applied on<input type="date" className="raw-input" value={editing.appliedOn} onChange={setEdit("appliedOn")} /></label>
+                      <label>Follow-up<input type="date" className="raw-input" value={editing.followUp} onChange={setEdit("followUp")} /></label>
+                      <label>Contact / referral<input className="raw-input" value={editing.contact} onChange={setEdit("contact")} placeholder="Name, how you know them" /></label>
+                      <label>Next action<input className="raw-input" value={editing.nextAction} onChange={setEdit("nextAction")} placeholder="e.g. Email recruiter" /></label>
+                    </div>
                     <textarea
                       className="raw-input tracker-notes"
-                      placeholder="Add notes — contacts, referral, follow-up date..."
-                      value={editingNotes}
-                      onChange={(e) => setEditingNotes(e.target.value)}
+                      placeholder="Notes"
+                      value={editing.notes}
+                      onChange={setEdit("notes")}
                       rows={3}
                     />
                     <div className="tracker-card-actions">
-                      <button className="btn btn-save" onClick={() => handleNotesChange(intern.id)}>
-                        Save Notes
+                      <button className="btn btn-save" onClick={() => handleSaveDetails(intern.id)}>
+                        {sync.state === "off" ? "Save" : "Save (syncs to sheet)"}
                       </button>
                       {intern.url ? (
                         <a className="btn" href={intern.url} target="_blank" rel="noopener noreferrer">
