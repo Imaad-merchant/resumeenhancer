@@ -68,7 +68,7 @@ export function buildApplicationEvents(startStr) {
   const start = parseDate(startStr);
   const events = [];
   for (const i of INTERNSHIPS) {
-    if (i.kind !== "opening") continue;
+    if (i.kind !== "opening" || i.postingStatus === "Closed") continue;
     if (i.deadline && parseDate(i.deadline) < start) continue;
 
     const floor = new Date(Math.max(start, i.opensOn ? parseDate(i.opensOn) : start));
@@ -96,7 +96,7 @@ export function buildApplicationEvents(startStr) {
       if (fri >= floor) date = fri;
       else date.setDate(date.getDate() + (dow === 6 ? 2 : 1));
     }
-    events.push({ date: toDateStr(date), title, category: "Applications", color: "#dc2626" });
+    events.push({ key: `apply-${i.id}`, date: toDateStr(date), title, category: "Applications", color: "#dc2626" });
   }
   return events;
 }

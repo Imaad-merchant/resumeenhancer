@@ -37,6 +37,7 @@ function formatDay(str) {
 
 function deadlineInfo(intern) {
   if (intern.kind !== "opening") return { label: "No verified posting yet", tone: "muted" };
+  if (intern.postingStatus === "Closed") return { label: "Posting closed", tone: "closed" };
   if (!intern.deadline) {
     if (intern.deadlineType === "Ongoing") return { label: "Rolling — apply anytime", tone: "ok" };
     if (intern.postingStatus === "Upcoming" || intern.postingStatus === "Window Published") return { label: "Opening soon — watch", tone: "watch" };
@@ -52,7 +53,7 @@ function deadlineInfo(intern) {
 function sortKey(i) {
   if (i.kind === "opening") {
     const days = i.deadline ? daysUntil(i.deadline) : 9999;
-    return [0, days < 0 ? 99999 : days, TIER_ORDER[i.tier] ?? 3, i.company];
+    return [0, days < 0 || i.postingStatus === "Closed" ? 99999 : days, TIER_ORDER[i.tier] ?? 3, i.company];
   }
   return [1, 0, TIER_ORDER[i.tier] ?? 3, i.company];
 }
@@ -97,7 +98,7 @@ export default function InternshipTracker() {
 
   const stats = useMemo(() => {
     const openings = internships.filter((i) => i.kind === "opening");
-    const live = openings.filter((i) => !i.deadline || daysUntil(i.deadline) >= 0);
+    const live = openings.filter((i) => i.postingStatus !== "Closed" && (!i.deadline || daysUntil(i.deadline) >= 0));
     const dueSoon = live.filter((i) => i.deadline && daysUntil(i.deadline) <= 7 && !DONE_STATUSES.includes(i.status)).length;
     const applied = internships.filter((i) => ["applied", "interviewing", "offer"].includes(i.status)).length;
     const interviewing = internships.filter((i) => i.status === "interviewing").length;
@@ -270,6 +271,7 @@ export default function InternshipTracker() {
                   <div className="tracker-card-left">
                     <div className="tracker-company">
                       {intern.company}
+                      {intern.isNew && <span className="tier-tag tier-new">New</span>}
                       {intern.tier && <span className={`tier-tag tier-${intern.tier.replace(/\s/g, "").toLowerCase()}`}>{intern.tier}</span>}
                     </div>
                     <div className="tracker-role">

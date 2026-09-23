@@ -2,6 +2,7 @@
 const TASKS_KEY = "internship-tracker-tasks-v2";
 const INIT_KEY = "internship-tracker-initialized-months-v2";
 const START_KEY = "internship-tracker-plan-start";
+const SEEN_KEY = "internship-tracker-seen-events-v2";
 
 function read(key, fallback) {
   try {
@@ -48,6 +49,7 @@ export function resetPlan() {
   write(TASKS_KEY, {});
   write(INIT_KEY, []);
   write(START_KEY, todayStr());
+  write(SEEN_KEY, []);
   return {};
 }
 
@@ -91,10 +93,10 @@ export function removeTask(tasks, date, taskId) {
 }
 
 /**
- * Fills a month with recurring template tasks and fixed-date events, starting at planStart.
+ * Fills a month with recurring template tasks, starting at planStart.
  * Plan week = floor(days since start / 7) % 4 + 1; each week's templates are spread Mon–Fri.
  */
-export function initializeMonth(tasks, year, month, defaults, fixedEvents, planStart) {
+export function initializeMonth(tasks, year, month, defaults, planStart) {
   const key = `${year}-${month}`;
   const initialized = read(INIT_KEY, []);
   if (initialized.includes(key)) return tasks;
@@ -131,24 +133,56 @@ export function initializeMonth(tasks, year, month, defaults, fixedEvents, planS
     }
   }
 
-  const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
-  for (const evt of fixedEvents || []) {
-    if (!evt.date.startsWith(prefix) || evt.date < planStart) continue;
+  saveTasks(updated);
+  write(INIT_KEY, [...initialized, key]);
+  return updated;
+}
+
+/**
+ * Keeps fixed-date events (application deadlines etc.) in sync across all months.
+ * Each event has a stable `key`; a key+title pair is only ever added once, so tasks the
+ * user deletes don't come back. When an event's title/date changes (deadline moved) or it
+ * disappears (posting closed), its old unchecked task is removed. Checked-off tasks are kept.
+ */
+export function syncFixedEvents(tasks, events, planStart) {
+  const seen = new Set(read(SEEN_KEY, []));
+  const current = new Map(events.filter((e) => e.date >= planStart).map((e) => [e.key, e]));
+  const updated = {};
+  let changed = false;
+
+  for (const [date, list] of Object.entries(tasks)) {
+    const kept = list.filter((t) => {
+      if (!t.eventKey || t.completed) return true;
+      const evt = current.get(t.eventKey);
+      const stale = !evt || evt.title !== t.title || evt.date !== date;
+      if (stale) changed = true;
+      return !stale;
+    });
+    if (kept.length) updated[date] = kept;
+  }
+
+  for (const evt of current.values()) {
+    const id = `${evt.key}|${evt.title}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    changed = true;
     if (!updated[evt.date]) updated[evt.date] = [];
-    if (updated[evt.date].some((t) => t.title === evt.title)) continue;
-    updated[evt.date].push({
-      id: `event-${evt.date}-${Math.random().toString(36).slice(2, 8)}`,
+    if (updated[evt.date].some((t) => t.eventKey === evt.key)) continue;
+    updated[evt.date] = [...updated[evt.date], {
+      id: `event-${evt.key}-${evt.date}`,
       templateId: null,
+      eventKey: evt.key,
       title: evt.title,
       category: evt.category,
       color: evt.color,
       completed: false,
       completedAt: null,
-    });
+    }];
   }
 
+  if (!changed) return tasks;
+  write(SEEN_KEY, [...seen]);
   saveTasks(updated);
-  write(INIT_KEY, [...initialized, key]);
   return updated;
 }
 

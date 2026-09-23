@@ -1754,3 +1754,8 @@ body,
     margin-left: 0;
   }
 }
+
+.tier-new {
+  background: var(--green-bg);
+  color: var(--green);
+}

@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import Calendar from "../components/Calendar";
 import TaskSidebar from "../components/TaskSidebar";
 import EventScanner from "../components/EventScanner";
-import { loadTasks, saveTasks, toggleTask, addCustomTask, removeTask, initializeMonth, formatDate, getPlanStart, resetPlan } from "../utils/taskStore";
-import { DEFAULT_TASKS, REAL_EVENTS } from "../utils/defaultTasks";
+import { loadTasks, saveTasks, toggleTask, addCustomTask, removeTask, initializeMonth, syncFixedEvents, formatDate, getPlanStart, resetPlan } from "../utils/taskStore";
+import { DEFAULT_TASKS } from "../utils/defaultTasks";
 import { buildApplicationEvents } from "../utils/internshipData";
 
 export default function CalendarPage() {
@@ -18,8 +18,8 @@ export default function CalendarPage() {
   const [planStart, setPlanStart] = useState(getPlanStart);
 
   useEffect(() => {
-    const fixed = [...REAL_EVENTS, ...buildApplicationEvents(planStart)];
-    setTasks(initializeMonth(loadTasks(), currentYear, currentMonth, DEFAULT_TASKS, fixed, planStart));
+    const t = initializeMonth(loadTasks(), currentYear, currentMonth, DEFAULT_TASKS, planStart);
+    setTasks(syncFixedEvents(t, buildApplicationEvents(planStart), planStart));
   }, [currentYear, currentMonth, planStart]);
 
   const handleRestartPlan = () => {
@@ -31,8 +31,8 @@ export default function CalendarPage() {
     setCurrentMonth(now.getMonth());
     setSelectedDate(start);
     // Re-run initialization even when the start date is unchanged
-    const fixed = [...REAL_EVENTS, ...buildApplicationEvents(start)];
-    setTasks(initializeMonth({}, now.getFullYear(), now.getMonth(), DEFAULT_TASKS, fixed, start));
+    const t = initializeMonth({}, now.getFullYear(), now.getMonth(), DEFAULT_TASKS, start);
+    setTasks(syncFixedEvents(t, buildApplicationEvents(start), start));
     setPlanStart(start);
     showNotif("Plan restarted from today");
   };
