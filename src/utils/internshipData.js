@@ -78,7 +78,7 @@ export function buildApplicationEvents(startStr) {
   const events = [];
   const queue = [];
   for (const i of INTERNSHIPS) {
-    if (i.kind !== "opening" || i.postingStatus === "Closed") continue;
+    if (i.kind !== "opening" || i.postingStatus === "Closed" || i.eligibility === "no") continue;
     if (i.deadline && parseDate(i.deadline) < start) continue;
     const floor = new Date(Math.max(start, i.opensOn ? parseDate(i.opensOn) : start));
 

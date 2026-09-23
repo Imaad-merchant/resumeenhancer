@@ -10,6 +10,9 @@ export const FOCUS_AREAS = [
   { name: "Tax", topics: ["Pricing", "Compliance", "Tariffs / duties", "Sales & use tax", "Vendor documentation"] },
 ];
 
+// Junior in 2026-27 → Summer 2027 is the rising-senior internship (most roles want Dec 2027–Aug 2028 grads)
+export const CLASS_YEAR = "Junior, Class of 2028";
+
 export const TARGET_ROLES = ["Procurement / Vendor Specialist", "Production Scheduler"];
 
 export const TARGET_INDUSTRIES = ["Makeup", "Airline — Cargo", "Credit Card", "Consulting"];
@@ -52,7 +55,7 @@ export const ROLE_SEARCH_BANK = [
 
 // One-paragraph summary fed to the AI bullet generator.
 export const PROFILE_SUMMARY =
-  `Target internships: ${INTERN_FUNCTIONS.join(", ")}. ` +
+  `${CLASS_YEAR}. Target internships: ${INTERN_FUNCTIONS.join(", ")}. ` +
   `Target roles: ${TARGET_ROLES.join(", ")}. ` +
   `Focus areas: ${FOCUS_AREAS.map((f) => f.name).join(", ")} ` +
   `(e.g. strategic sourcing, vendor risk, trade compliance, contracts, tariffs). ` +

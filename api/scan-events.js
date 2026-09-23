@@ -3,7 +3,7 @@ import { PROFILE_SUMMARY } from "../src/utils/careerProfile.js";
 import { INTERNSHIPS } from "../src/utils/internshipData.js";
 
 const PROFILE = `Supply chain management major at UGA Terry College of Business.
-Certificate in legal studies and financial technology. Sophomore, first-gen, from Texas.
+Certificate in legal studies and financial technology. Junior (Class of 2028, rising senior in Summer 2027), first-gen, from Texas.
 ${PROFILE_SUMMARY}`;
 
 export default jsonHandler(async ({ text }) => {
