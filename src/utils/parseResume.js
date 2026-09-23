@@ -48,6 +48,16 @@ export function extractSections(html) {
       continue;
     }
 
+    // Bare list items (e.g. Word "List Paragraph" style mapped to li)
+    if (tag === "li") {
+      const text = el.textContent.trim();
+      if (text && text.length > 5) {
+        if (!sections[currentSection]) sections[currentSection] = [];
+        sections[currentSection].push(text);
+      }
+      continue;
+    }
+
     // Extract bullets from lists
     if (tag === "ul" || tag === "ol") {
       const items = el.querySelectorAll("li");
