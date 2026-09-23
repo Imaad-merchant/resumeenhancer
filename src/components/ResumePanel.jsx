@@ -1,5 +1,6 @@
 import { useRef, useCallback } from "react";
 import { exportToDocx } from "../utils/exportResume";
+import { RESUME_ACCEPT, RESUME_FORMATS_LABEL } from "../utils/resumeFiles";
 
 export default function ResumePanel({ html, onHtmlChange, onFileUpload }) {
   const editorRef = useRef(null);
@@ -22,12 +23,7 @@ export default function ResumePanel({ html, onHtmlChange, onFileUpload }) {
       e.preventDefault();
       e.stopPropagation();
       const file = e.dataTransfer?.files[0];
-      if (
-        file &&
-        file.name.endsWith(".docx")
-      ) {
-        onFileUpload(file);
-      }
+      if (file) onFileUpload(file);
     },
     [onFileUpload]
   );
@@ -49,7 +45,7 @@ export default function ResumePanel({ html, onHtmlChange, onFileUpload }) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
             </svg>
-            Upload DOCX
+            Upload Resume
           </button>
           {html && (
             <button className="btn btn-export" onClick={handleExport}>
@@ -63,11 +59,12 @@ export default function ResumePanel({ html, onHtmlChange, onFileUpload }) {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".docx"
+          accept={RESUME_ACCEPT}
           style={{ display: "none" }}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) onFileUpload(file);
+            e.target.value = "";
           }}
         />
       </div>
@@ -101,7 +98,7 @@ export default function ResumePanel({ html, onHtmlChange, onFileUpload }) {
               </svg>
             </div>
             <p className="upload-title">Drop your resume here</p>
-            <p className="upload-subtitle">or click to upload a .docx file</p>
+            <p className="upload-subtitle">or click to upload — {RESUME_FORMATS_LABEL}</p>
           </div>
         )}
       </div>

@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import ResumePanel from "../components/ResumePanel";
 import BulletLibrary from "../components/BulletLibrary";
-import { docxToHtml, extractSections } from "../utils/parseResume";
+import { extractSections } from "../utils/parseResume";
+import { fileToHtml } from "../utils/resumeFiles";
 import {
   loadLibrary,
   addBulletToSection,
@@ -29,8 +30,9 @@ export default function ResumeEnhancer() {
 
   const handleFileUpload = useCallback(
     async (file) => {
+      showNotif(`Reading "${file.name}"…`);
       try {
-        const resumeHtml = await docxToHtml(file);
+        const resumeHtml = await fileToHtml(file);
         setHtml(resumeHtml);
         const sections = extractSections(resumeHtml);
         setSectionNames(Object.keys(sections));
@@ -38,8 +40,8 @@ export default function ResumeEnhancer() {
         setLibrary(merged);
         showNotif(`Loaded "${file.name}" - extracted ${Object.values(sections).flat().length} bullets`);
       } catch (err) {
-        console.error("Failed to parse DOCX:", err);
-        showNotif("Failed to parse file. Make sure it's a .docx", "error");
+        console.error("Failed to read resume:", err);
+        showNotif(err.message || "Couldn't read that file", "error");
       }
     },
     [library, showNotif]
