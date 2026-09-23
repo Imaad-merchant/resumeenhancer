@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { loadInternships, updateInternshipStatus, updateInternshipNotes, daysUntil, parseDate } from "../utils/internshipData";
-import { FOCUS_AREAS, TARGET_ROLES, TARGET_INDUSTRIES, INTERN_FUNCTIONS, ROLE_SEARCH_BANK } from "../utils/careerProfile";
+import { CLASS_YEAR, FOCUS_AREAS, TARGET_ROLES, TARGET_INDUSTRIES, INTERN_FUNCTIONS, ROLE_SEARCH_BANK } from "../utils/careerProfile";
 
 const STATUS_OPTIONS = [
   { value: "not_started", label: "Not Started", color: "var(--text-dim)" },
@@ -38,6 +38,7 @@ function formatDay(str) {
 function deadlineInfo(intern) {
   if (intern.kind !== "opening") return { label: "No verified posting yet", tone: "muted" };
   if (intern.postingStatus === "Closed") return { label: "Posting closed", tone: "closed" };
+  if (intern.eligibility === "no") return { label: "Likely not eligible (see Dates)", tone: "closed" };
   if (!intern.deadline) {
     if (intern.deadlineType === "Ongoing") return { label: "Rolling — apply anytime", tone: "ok" };
     if (intern.postingStatus === "Upcoming" || intern.postingStatus === "Window Published") return { label: "Opening soon — watch", tone: "watch" };
@@ -53,7 +54,7 @@ function deadlineInfo(intern) {
 function sortKey(i) {
   if (i.kind === "opening") {
     const days = i.deadline ? daysUntil(i.deadline) : 9999;
-    return [0, days < 0 || i.postingStatus === "Closed" ? 99999 : days, TIER_ORDER[i.tier] ?? 3, i.company];
+    return [0, days < 0 || i.postingStatus === "Closed" || i.eligibility === "no" ? 99999 : days, TIER_ORDER[i.tier] ?? 3, i.company];
   }
   return [1, 0, TIER_ORDER[i.tier] ?? 3, i.company];
 }
@@ -98,7 +99,7 @@ export default function InternshipTracker() {
 
   const stats = useMemo(() => {
     const openings = internships.filter((i) => i.kind === "opening");
-    const live = openings.filter((i) => i.postingStatus !== "Closed" && (!i.deadline || daysUntil(i.deadline) >= 0));
+    const live = openings.filter((i) => i.postingStatus !== "Closed" && i.eligibility !== "no" && (!i.deadline || daysUntil(i.deadline) >= 0));
     const dueSoon = live.filter((i) => i.deadline && daysUntil(i.deadline) <= 7 && !DONE_STATUSES.includes(i.status)).length;
     const applied = internships.filter((i) => ["applied", "interviewing", "offer"].includes(i.status)).length;
     const interviewing = internships.filter((i) => i.status === "interviewing").length;
@@ -168,6 +169,12 @@ export default function InternshipTracker() {
                     {f}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div className="focus-row">
+              <span className="focus-label">Class</span>
+              <div className="focus-chips">
+                <span className="focus-chip">{CLASS_YEAR}</span>
               </div>
             </div>
             <div className="focus-row">
