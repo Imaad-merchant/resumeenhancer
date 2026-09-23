@@ -1,47 +1,54 @@
-const TASKS_KEY = "internship-tracker-tasks";
-const INIT_KEY = "internship-tracker-initialized-months";
-const VERSIONS_KEY = "internship-tracker-month-versions";
+// v2 keys: the plan restarted on 2026-09-23 with weeks anchored to a start date
+const TASKS_KEY = "internship-tracker-tasks-v2";
+const INIT_KEY = "internship-tracker-initialized-months-v2";
+const START_KEY = "internship-tracker-plan-start";
+
+function read(key, fallback) {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function write(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // storage unavailable — state lasts for this session only
+  }
+}
+
+function todayStr() {
+  const d = new Date();
+  return formatDate(d.getFullYear(), d.getMonth(), d.getDate());
+}
 
 export function loadTasks() {
-  try {
-    const data = localStorage.getItem(TASKS_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch {
-    return {};
-  }
+  return read(TASKS_KEY, {});
 }
 
 export function saveTasks(tasks) {
-  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  write(TASKS_KEY, tasks);
 }
 
-function getInitializedMonths() {
-  try {
-    const data = localStorage.getItem(INIT_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
+/** The day the plan started; set to today the first time it's read. */
+export function getPlanStart() {
+  let start = read(START_KEY, null);
+  if (!start) {
+    start = todayStr();
+    write(START_KEY, start);
   }
+  return start;
 }
 
-function getMonthVersions() {
-  try {
-    const data = localStorage.getItem(VERSIONS_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch {
-    return {};
-  }
-}
-
-function markMonthInitialized(key, version) {
-  const months = getInitializedMonths();
-  if (!months.includes(key)) {
-    months.push(key);
-    localStorage.setItem(INIT_KEY, JSON.stringify(months));
-  }
-  const versions = getMonthVersions();
-  versions[key] = version;
-  localStorage.setItem(VERSIONS_KEY, JSON.stringify(versions));
+/** Wipes all calendar tasks and restarts the 4-week plan from today. */
+export function resetPlan() {
+  write(TASKS_KEY, {});
+  write(INIT_KEY, []);
+  write(START_KEY, todayStr());
+  return {};
 }
 
 export function toggleTask(tasks, date, taskId) {
@@ -83,76 +90,65 @@ export function removeTask(tasks, date, taskId) {
   return updated;
 }
 
-export function initializeMonth(tasks, year, month, defaults, realEvents, templateVersion = 1) {
+/**
+ * Fills a month with recurring template tasks and fixed-date events, starting at planStart.
+ * Plan week = floor(days since start / 7) % 4 + 1; each week's templates are spread Mon–Fri.
+ */
+export function initializeMonth(tasks, year, month, defaults, fixedEvents, planStart) {
   const key = `${year}-${month}`;
-  // Months initialized before versioning existed count as version 1
-  const done = getMonthVersions()[key] ?? (getInitializedMonths().includes(key) ? 1 : 0);
-  if (done >= templateVersion) return tasks;
+  const initialized = read(INIT_KEY, []);
+  if (initialized.includes(key)) return tasks;
 
-  // Don't backfill new templates into past months
-  const now = new Date();
-  if (done > 0 && (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth()))) {
-    markMonthInitialized(key, templateVersion);
-    return tasks;
-  }
-
-  const templates = defaults.filter((t) => (t.since ?? 1) > done);
+  const [sy, sm, sd] = planStart.split("-").map(Number);
+  const start = new Date(sy, sm - 1, sd);
   const updated = { ...tasks };
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);
-    const weekOfMonth = Math.ceil(day / 7);
-    const dateStr = formatDate(year, month, day);
-
-    if (!updated[dateStr]) updated[dateStr] = [];
-
-    // Add recurring tasks matching this week
-    const weekTasks = templates.filter((t) => t.weekOfMonth === Math.min(weekOfMonth, 4));
-
-    // Spread tasks across days of the week (Mon-Fri)
+    if (date < start) continue;
     const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
-    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      const tasksForDay = weekTasks.filter((_, i) => i % 5 === dayOfWeek - 1);
-      for (const t of tasksForDay) {
-        if (!updated[dateStr].some((existing) => existing.templateId === t.id)) {
-          updated[dateStr].push({
-            id: `${t.id}-${dateStr}`,
-            templateId: t.id,
-            title: t.title,
-            category: t.category,
-            color: t.color,
-            completed: false,
-            completedAt: null,
-          });
-        }
-      }
+    if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
+    const daysSinceStart = Math.round((date - start) / 86400000);
+    const planWeek = (Math.floor(daysSinceStart / 7) % 4) + 1;
+    const weekTasks = defaults.filter((t) => t.weekOfMonth === planWeek);
+    const tasksForDay = weekTasks.filter((_, i) => i % 5 === dayOfWeek - 1);
+
+    const dateStr = formatDate(year, month, day);
+    for (const t of tasksForDay) {
+      if (!updated[dateStr]) updated[dateStr] = [];
+      if (updated[dateStr].some((existing) => existing.templateId === t.id)) continue;
+      updated[dateStr].push({
+        id: `${t.id}-${dateStr}`,
+        templateId: t.id,
+        title: t.title,
+        category: t.category,
+        color: t.color,
+        completed: false,
+        completedAt: null,
+      });
     }
   }
 
-  // Add real fixed-date events (from terry.uga.edu, career.uga.edu, etc.)
-  if (realEvents && done === 0) {
-    const monthStr = String(month + 1).padStart(2, "0");
-    const prefix = `${year}-${monthStr}`;
-    for (const evt of realEvents) {
-      if (!evt.date.startsWith(prefix)) continue;
-      if (!updated[evt.date]) updated[evt.date] = [];
-      if (!updated[evt.date].some((t) => t.title === evt.title)) {
-        updated[evt.date].push({
-          id: `event-${evt.date}-${Math.random().toString(36).slice(2, 8)}`,
-          templateId: null,
-          title: evt.title,
-          category: evt.category,
-          color: evt.color,
-          completed: false,
-          completedAt: null,
-        });
-      }
-    }
+  const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
+  for (const evt of fixedEvents || []) {
+    if (!evt.date.startsWith(prefix) || evt.date < planStart) continue;
+    if (!updated[evt.date]) updated[evt.date] = [];
+    if (updated[evt.date].some((t) => t.title === evt.title)) continue;
+    updated[evt.date].push({
+      id: `event-${evt.date}-${Math.random().toString(36).slice(2, 8)}`,
+      templateId: null,
+      title: evt.title,
+      category: evt.category,
+      color: evt.color,
+      completed: false,
+      completedAt: null,
+    });
   }
 
   saveTasks(updated);
-  markMonthInitialized(key, templateVersion);
+  write(INIT_KEY, [...initialized, key]);
   return updated;
 }
 

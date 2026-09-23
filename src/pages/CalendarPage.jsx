@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import Calendar from "../components/Calendar";
 import TaskSidebar from "../components/TaskSidebar";
 import EventScanner from "../components/EventScanner";
-import { loadTasks, saveTasks, toggleTask, addCustomTask, removeTask, initializeMonth, formatDate } from "../utils/taskStore";
-import { DEFAULT_TASKS, REAL_EVENTS, TEMPLATE_VERSION } from "../utils/defaultTasks";
+import { loadTasks, saveTasks, toggleTask, addCustomTask, removeTask, initializeMonth, formatDate, getPlanStart, resetPlan } from "../utils/taskStore";
+import { DEFAULT_TASKS, REAL_EVENTS } from "../utils/defaultTasks";
+import { buildApplicationEvents } from "../utils/internshipData";
 
 export default function CalendarPage() {
   const today = new Date();
@@ -14,12 +15,27 @@ export default function CalendarPage() {
   );
   const [tasks, setTasks] = useState({});
   const [notification, setNotification] = useState(null);
+  const [planStart, setPlanStart] = useState(getPlanStart);
 
   useEffect(() => {
-    let t = loadTasks();
-    t = initializeMonth(t, currentYear, currentMonth, DEFAULT_TASKS, REAL_EVENTS, TEMPLATE_VERSION);
-    setTasks(t);
-  }, [currentYear, currentMonth]);
+    const fixed = [...REAL_EVENTS, ...buildApplicationEvents(planStart)];
+    setTasks(initializeMonth(loadTasks(), currentYear, currentMonth, DEFAULT_TASKS, fixed, planStart));
+  }, [currentYear, currentMonth, planStart]);
+
+  const handleRestartPlan = () => {
+    if (!window.confirm("Restart your plan from today? This clears all calendar tasks, including ones you added or checked off.")) return;
+    resetPlan();
+    const start = getPlanStart();
+    const now = new Date();
+    setCurrentYear(now.getFullYear());
+    setCurrentMonth(now.getMonth());
+    setSelectedDate(start);
+    // Re-run initialization even when the start date is unchanged
+    const fixed = [...REAL_EVENTS, ...buildApplicationEvents(start)];
+    setTasks(initializeMonth({}, now.getFullYear(), now.getMonth(), DEFAULT_TASKS, fixed, start));
+    setPlanStart(start);
+    showNotif("Plan restarted from today");
+  };
 
   const showNotif = useCallback((msg, type = "success") => {
     setNotification({ msg, type });
@@ -123,6 +139,10 @@ export default function CalendarPage() {
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
           />
+          <div className="plan-bar">
+            <span>Plan started {new Date(planStart + "T00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+            <button className="btn plan-restart" onClick={handleRestartPlan}>Restart from today</button>
+          </div>
           <EventScanner onEventsFound={handleEventsFound} />
         </div>
         <div className="sidebar-panel">
