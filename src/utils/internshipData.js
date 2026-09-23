@@ -13,10 +13,14 @@ function loadState() {
   }
 }
 
+const USER_FIELDS = ["status", "notes", "appliedOn", "contact", "followUp", "nextAction"];
+
 function saveState(internships) {
   const state = {};
   for (const i of internships) {
-    if (i.status !== "not_started" || i.notes) state[i.id] = { status: i.status, notes: i.notes };
+    if (i.fromSheet) continue;
+    const own = Object.fromEntries(USER_FIELDS.filter((k) => i[k] && !(k === "status" && i[k] === "not_started")).map((k) => [k, i[k]]));
+    if (Object.keys(own).length) state[i.id] = own;
   }
   try {
     localStorage.setItem(STATE_KEY, JSON.stringify(state));
@@ -28,6 +32,13 @@ function saveState(internships) {
 export function loadInternships() {
   const state = loadState();
   return INTERNSHIPS.map((i) => ({ ...i, ...state[i.id] }));
+}
+
+/** Applies a patch of user fields to one internship and persists locally. */
+export function updateInternship(internships, id, patch) {
+  const updated = internships.map((i) => (i.id === id ? { ...i, ...patch } : i));
+  saveState(updated);
+  return updated;
 }
 
 export function updateInternshipStatus(internships, id, status) {
@@ -118,4 +129,8 @@ export function buildApplicationEvents(startStr) {
     events.push({ key: `apply-${i.id}`, date: key, title, category: "Applications", color: "#dc2626" });
   }
   return events;
+}
+
+export function persistInternships(internships) {
+  saveState(internships);
 }
