@@ -1,5 +1,9 @@
 // Two-way sync with the Google Sheet tracker via /api/tracker.
+import { REMOVED } from "./internshipList.js";
+
 const PASS_KEY = "tracker-passcode";
+const REMOVED_IDS = new Set(REMOVED.map((r) => String(r.id)));
+const REMOVED_URLS = new Set(REMOVED.map((r) => r.url).filter(Boolean));
 
 export const STATUS_LABELS = {
   not_started: "Not Started",
@@ -73,6 +77,8 @@ export async function pullFromSheet(internships) {
   const extras = [];
 
   for (const r of rows) {
+    // Postings deleted from the list (e.g. deadline passed) shouldn't come back as sheet-only rows
+    if (REMOVED_IDS.has(String(r["App ID"])) || (r.Link && REMOVED_URLS.has(r.Link))) continue;
     let match = r["App ID"] && byId.get(String(r["App ID"]));
     if (!match && r.Link) match = internships.find((i) => !used.has(i.id) && i.url && i.url === r.Link);
     if (!match) match = internships.find((i) => !used.has(i.id) && norm(i.company) === norm(r.Company) && roleMatches(r.Role, i.role));

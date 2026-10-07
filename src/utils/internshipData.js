@@ -1,4 +1,4 @@
-import { INTERNSHIPS } from "./internshipList.js";
+import { INTERNSHIPS, LIST_UPDATED } from "./internshipList.js";
 
 export { INTERNSHIPS };
 
@@ -84,12 +84,15 @@ function isWeekend(date) {
  */
 const PER_DAY = 3;
 
+const IN_PROCESS = ["applied", "interviewing", "offer", "rejected"];
+
 export function buildApplicationEvents(startStr) {
-  const start = parseDate(startStr);
+  // Never schedule into days that had already passed when the list was refreshed
+  const start = parseDate(startStr > LIST_UPDATED ? startStr : LIST_UPDATED);
   const events = [];
   const queue = [];
   for (const i of INTERNSHIPS) {
-    if (i.kind !== "opening" || i.postingStatus === "Closed" || i.eligibility === "no") continue;
+    if (i.kind !== "opening" || i.postingStatus === "Closed" || i.eligibility === "no" || IN_PROCESS.includes(i.status)) continue;
     if (i.deadline && parseDate(i.deadline) < start) continue;
     const floor = new Date(Math.max(start, i.opensOn ? parseDate(i.opensOn) : start));
 

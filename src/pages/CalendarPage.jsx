@@ -5,6 +5,7 @@ import EventScanner from "../components/EventScanner";
 import { loadTasks, saveTasks, toggleTask, addCustomTask, removeTask, initializeMonth, syncFixedEvents, formatDate, getPlanStart, resetPlan } from "../utils/taskStore";
 import { DEFAULT_TASKS } from "../utils/defaultTasks";
 import { buildApplicationEvents } from "../utils/internshipData";
+import { INTERVIEW_EVENTS } from "../utils/interviews";
 
 export default function CalendarPage() {
   const today = new Date();
@@ -19,7 +20,7 @@ export default function CalendarPage() {
 
   useEffect(() => {
     const t = initializeMonth(loadTasks(), currentYear, currentMonth, DEFAULT_TASKS, planStart);
-    setTasks(syncFixedEvents(t, buildApplicationEvents(planStart), planStart));
+    setTasks(syncFixedEvents(t, [...buildApplicationEvents(planStart), ...INTERVIEW_EVENTS], planStart));
   }, [currentYear, currentMonth, planStart]);
 
   const handleRestartPlan = () => {
@@ -32,7 +33,7 @@ export default function CalendarPage() {
     setSelectedDate(start);
     // Re-run initialization even when the start date is unchanged
     const t = initializeMonth({}, now.getFullYear(), now.getMonth(), DEFAULT_TASKS, start);
-    setTasks(syncFixedEvents(t, buildApplicationEvents(start), start));
+    setTasks(syncFixedEvents(t, [...buildApplicationEvents(start), ...INTERVIEW_EVENTS], start));
     setPlanStart(start);
     showNotif("Plan restarted from today");
   };

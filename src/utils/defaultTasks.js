@@ -13,6 +13,7 @@ export const CATEGORIES = {
   COFFEE_CHATS: { name: "Coffee Chats", color: "#b45309" },
   RESEARCH: { name: "Research", color: "#0d9488" },
   APPLICATIONS: { name: "Applications", color: "#dc2626" },
+  INTERVIEWS: { name: "Interviews", color: "#7c3aed" },
 };
 
 
