@@ -15,6 +15,13 @@ export const INTERVIEW_EVENTS = [
     color: "#7c3aed",
   },
   {
+    key: "interview-incomm-final-2026-10-08",
+    date: "2026-10-08",
+    title: "InComm final meeting — 2:30 PM with Kayla Glaze (Account Management Intern)",
+    category: "Interviews",
+    color: "#7c3aed",
+  },
+  {
     key: "prep-incomm-final",
     date: "2026-10-07",
     title: "Prep: InComm final meeting — gift card distribution, partner business reviews, Excel/Power BI, Macy's/Sephora/Chili's",
