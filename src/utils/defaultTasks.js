@@ -14,6 +14,7 @@ export const CATEGORIES = {
   RESEARCH: { name: "Research", color: "#0d9488" },
   APPLICATIONS: { name: "Applications", color: "#dc2626" },
   INTERVIEWS: { name: "Interviews", color: "#7c3aed" },
+  CAREER_FAIR: { name: "Career Fair", color: "#0891b2" },
 };
 
 

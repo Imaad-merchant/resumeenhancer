@@ -1,4 +1,4 @@
-// The user's internship search focus (account-management lane since 2026-10-07) — drives the tracker "My Focus" panel,
+// The user's internship search focus (account management first, explored broadly across career lanes) — drives the tracker "My Focus" panel,
 // calendar coffee-chat/research tasks, and AI bullet generation context.
 
 export const FOCUS_AREAS = [
@@ -15,12 +15,25 @@ export const CLASS_YEAR = "Junior, Class of 2028";
 
 // Primary lane: B2B relationship management (keep existing corporate clients/partners happy and growing),
 // not cold-call sales. Supplier relationship management is the buy-side version of the same skill set.
+// Career lanes worth exploring (from the Oct 2026 career-fair debrief)
+export const CAREER_LANES = [
+  { lane: "Relationship / people", roles: ["Strategic Partnerships", "Business Development", "Account Management", "Client Strategy"] },
+  { lane: "Risk / problem solving", roles: ["Enterprise Risk", "Operational Risk", "Business Continuity", "Third-Party Risk", "Supply Chain Risk"] },
+  { lane: "Negotiation / vendors", roles: ["Strategic Sourcing", "Procurement", "Supplier Relationship Mgmt", "Vendor Management", "Global Sourcing"] },
+  { lane: "Big-picture business", roles: ["Corporate Strategy", "Commercial Strategy", "Corporate Development", "Management Consulting"] },
+  { lane: "Legal / international", roles: ["Trade Compliance", "Contracts", "Regulatory Compliance", "Customs / Tariffs"] },
+  { lane: "Fintech", roles: ["Payments Strategy", "Product Management", "Strategic Partnerships", "Implementation", "Solutions Consulting"] },
+  { lane: "Insurance brokerage", roles: ["Client Management", "Client Service", "Brokerage", "Producer track → Client Executive"] },
+];
+
 export const TARGET_ROLES = [
   "Strategic / Key Account Manager",
   "Partner Account Manager",
   "Client Relationship / Client Services",
   "Strategic Partnerships",
   "Supplier Relationship Manager",
+  "Business Development / Commercial Strategy",
+  "Insurance Client Management (→ Client Executive / Producer)",
 ];
 
 export const TARGET_INDUSTRIES = ["Payments / Fintech", "Beauty", "Travel / Airlines", "Insurance / Risk", "Consulting"];
@@ -49,6 +62,13 @@ export const ROLE_SEARCH_BANK = [
   {"family": "Partnerships", "priority": "Core", "search": "Partnerships Intern", "also": ["Strategic Partnerships Intern", "Retail Partnerships Intern", "Alliances Intern"]},
   {"family": "Customer Development (CPG / Beauty)", "priority": "Core", "search": "Customer Development Intern", "also": ["Customer Business Development Intern", "Sales & Customer Management Intern", "Category Management Intern"]},
   {"family": "Insurance Client Service", "priority": "Core", "search": "Risk Solutions Intern", "also": ["Client Service Intern insurance", "Account Management Intern insurance", "Client Advisor Intern"]},
+  {"family": "Business Development", "priority": "Core", "search": "Business Development Intern", "also": ["Growth Strategy Intern", "Partnerships Analyst Intern"]},
+  {"family": "Insurance Brokerage", "priority": "Core", "search": "Brokerage Intern", "also": ["Client Management Intern", "Commercial Risk Intern", "Producer Intern"]},
+  {"family": "Business Continuity / Resilience", "priority": "Recommended", "search": "Business Continuity Intern", "also": ["Resilience Intern", "Crisis Management Intern", "Operational Resilience Intern"]},
+  {"family": "Commercial Strategy", "priority": "Recommended", "search": "Commercial Strategy Intern", "also": ["Revenue Strategy Intern", "Pricing Strategy Intern"]},
+  {"family": "Risk Consulting", "priority": "Recommended", "search": "Risk Consulting Intern", "also": ["Risk Advisory Intern", "Controls Consulting Intern"]},
+  {"family": "Solutions / Implementation", "priority": "Recommended", "search": "Implementation Consultant Intern", "also": ["Solutions Consultant Intern", "Pre-Sales Intern"]},
+  {"family": "Corporate Development", "priority": "Recommended", "search": "Corporate Development Intern", "also": ["M&A Intern", "Strategic Investments Intern"]},
   {"family": "Customer Success (Enterprise)", "priority": "Recommended", "search": "Customer Success Intern", "also": ["Partner Manager Intern", "Client Success Intern"]},
   {"family": "Strategic Sourcing", "priority": "Core", "search": "Strategic Sourcing Intern", "also": ["Sourcing Analyst Intern", "Global Sourcing Intern"]},
   {"family": "Procurement / Purchasing", "priority": "Core", "search": "Procurement Intern", "also": ["Purchasing Intern", "Buyer Intern", "Procurement Analyst Intern"]},
@@ -69,7 +89,7 @@ export const ROLE_SEARCH_BANK = [
 
 // One-paragraph summary fed to the AI bullet generator.
 export const PROFILE_SUMMARY =
-  `${CLASS_YEAR}. Career lane: B2B account / relationship management (managing corporate clients, partners and suppliers: business reviews, negotiation, cross-functional coordination). ` +
+  `${CLASS_YEAR}. Primary lane: B2B account / relationship management (corporate clients, partners and suppliers: business reviews, negotiation, cross-functional coordination); also exploring partnerships, business development, insurance client management, business continuity / third-party risk, sourcing and strategy. Not cold-call sales. ` +
   `Target internships: ${INTERN_FUNCTIONS.join(", ")}. ` +
   `Target roles: ${TARGET_ROLES.join(", ")}. ` +
   `Focus areas: ${FOCUS_AREAS.map((f) => f.name).join(", ")} ` +
