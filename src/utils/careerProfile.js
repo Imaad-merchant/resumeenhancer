@@ -1,4 +1,4 @@
-// The user's internship search focus — drives the tracker "My Focus" panel,
+// The user's internship search focus (account-management lane since 2026-10-07) — drives the tracker "My Focus" panel,
 // calendar coffee-chat/research tasks, and AI bullet generation context.
 
 export const FOCUS_AREAS = [
@@ -13,11 +13,19 @@ export const FOCUS_AREAS = [
 // Junior in 2026-27 → Summer 2027 is the rising-senior internship (most roles want Dec 2027–Aug 2028 grads)
 export const CLASS_YEAR = "Junior, Class of 2028";
 
-export const TARGET_ROLES = ["Procurement / Vendor Specialist", "Production Scheduler"];
+// Primary lane: B2B relationship management (keep existing corporate clients/partners happy and growing),
+// not cold-call sales. Supplier relationship management is the buy-side version of the same skill set.
+export const TARGET_ROLES = [
+  "Strategic / Key Account Manager",
+  "Partner Account Manager",
+  "Client Relationship / Client Services",
+  "Strategic Partnerships",
+  "Supplier Relationship Manager",
+];
 
-export const TARGET_INDUSTRIES = ["Makeup", "Airline — Cargo", "Credit Card", "Consulting"];
+export const TARGET_INDUSTRIES = ["Payments / Fintech", "Beauty", "Travel / Airlines", "Insurance / Risk", "Consulting"];
 
-export const INTERN_FUNCTIONS = ["Operations", "Supply Chain", "Vendor Management", "Logistics", "Distribution", "Strategy"];
+export const INTERN_FUNCTIONS = ["Account Management", "Client Services", "Partnerships", "Customer Development", "Vendor Management", "Supply Chain", "Strategy"];
 
 export const RESEARCH_CHANNELS = ["Company research / mailing lists", "LinkedIn research", "Forage"];
 
@@ -36,6 +44,12 @@ export const COFFEE_CHATS = [
 
 // What to type into Handshake / careers pages (from the Role Search Bank sheet)
 export const ROLE_SEARCH_BANK = [
+  {"family": "Strategic / Key Account Management", "priority": "Core", "search": "Account Management Intern", "also": ["Key Account Intern", "Strategic Accounts Intern", "National Account Intern"]},
+  {"family": "Partner / Client Relationship", "priority": "Core", "search": "Partner Account Management Intern", "also": ["Client Services Intern", "Client Relationship Intern", "Relationship Management Intern"]},
+  {"family": "Partnerships", "priority": "Core", "search": "Partnerships Intern", "also": ["Strategic Partnerships Intern", "Retail Partnerships Intern", "Alliances Intern"]},
+  {"family": "Customer Development (CPG / Beauty)", "priority": "Core", "search": "Customer Development Intern", "also": ["Customer Business Development Intern", "Sales & Customer Management Intern", "Category Management Intern"]},
+  {"family": "Insurance Client Service", "priority": "Core", "search": "Risk Solutions Intern", "also": ["Client Service Intern insurance", "Account Management Intern insurance", "Client Advisor Intern"]},
+  {"family": "Customer Success (Enterprise)", "priority": "Recommended", "search": "Customer Success Intern", "also": ["Partner Manager Intern", "Client Success Intern"]},
   {"family": "Strategic Sourcing", "priority": "Core", "search": "Strategic Sourcing Intern", "also": ["Sourcing Analyst Intern", "Global Sourcing Intern"]},
   {"family": "Procurement / Purchasing", "priority": "Core", "search": "Procurement Intern", "also": ["Purchasing Intern", "Buyer Intern", "Procurement Analyst Intern"]},
   {"family": "Vendor / Supplier Management", "priority": "Core", "search": "Vendor Management Intern", "also": ["Supplier Management Intern", "Supplier Relations Intern"]},
@@ -55,8 +69,9 @@ export const ROLE_SEARCH_BANK = [
 
 // One-paragraph summary fed to the AI bullet generator.
 export const PROFILE_SUMMARY =
-  `${CLASS_YEAR}. Target internships: ${INTERN_FUNCTIONS.join(", ")}. ` +
+  `${CLASS_YEAR}. Career lane: B2B account / relationship management (managing corporate clients, partners and suppliers: business reviews, negotiation, cross-functional coordination). ` +
+  `Target internships: ${INTERN_FUNCTIONS.join(", ")}. ` +
   `Target roles: ${TARGET_ROLES.join(", ")}. ` +
   `Focus areas: ${FOCUS_AREAS.map((f) => f.name).join(", ")} ` +
-  `(e.g. strategic sourcing, vendor risk, trade compliance, contracts, tariffs). ` +
+  `(e.g. client/partner relationships, vendor management, contracts, pricing, vendor risk). ` +
   `Target industries: ${TARGET_INDUSTRIES.join(", ")}.`;

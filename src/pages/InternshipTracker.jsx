@@ -18,6 +18,7 @@ const DONE_STATUSES = ["applied", "interviewing", "offer", "rejected"];
 const KIND_FILTERS = [
   { value: "all", label: "All" },
   { value: "opening", label: "Open 2027 roles" },
+  { value: "am", label: "Account Mgmt roles" },
   { value: "target", label: "Target companies" },
 ];
 
@@ -31,6 +32,9 @@ const LOCATION_FILTERS = {
 };
 
 const EMPTY_EDIT = { appliedOn: "", followUp: "", contact: "", nextAction: "", notes: "" };
+
+const AM_RE = /account|client|partner|customer (success|development|business|management|solutions)|relationship|alliance|risk solutions/i;
+const isAccountRole = (i) => i.kind === "opening" && (AM_RE.test(i.role) || /account management|client/i.test(i.keywords || ""));
 
 const TIER_ORDER = { "Tier 1": 0, "Tier 2": 1, Explore: 2 };
 
@@ -91,7 +95,7 @@ export default function InternshipTracker() {
     const locRe = LOCATION_FILTERS[locationFilter];
     return internships
       .filter((i) => {
-        if (kindFilter !== "all" && i.kind !== kindFilter) return false;
+        if (kindFilter === "am" ? !isAccountRole(i) : kindFilter !== "all" && i.kind !== kindFilter) return false;
         if (categoryFilter !== "All" && i.category !== categoryFilter) return false;
         if (locRe && !locRe.test(i.location)) return false;
         if (statusFilter !== "All" && i.status !== statusFilter) return false;
