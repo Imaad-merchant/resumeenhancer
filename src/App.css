@@ -1821,3 +1821,24 @@ body,
     grid-template-columns: 1fr;
   }
 }
+
+.focus-lanes,
+.focus-pitch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.focus-pitch p {
+  margin: 0;
+  font-size: 13px;
+  font-style: italic;
+  border-left: 3px solid var(--purple);
+  padding-left: 10px;
+}
+
+.tracker-contact {
+  color: #0891b2;
+  font-weight: 600;
+}

@@ -6,6 +6,8 @@ import { loadTasks, saveTasks, toggleTask, addCustomTask, removeTask, initialize
 import { DEFAULT_TASKS } from "../utils/defaultTasks";
 import { buildApplicationEvents } from "../utils/internshipData";
 import { INTERVIEW_EVENTS } from "../utils/interviews";
+import { FAIR_EVENTS } from "../utils/careerFair";
+import { CAMPUS_EVENTS } from "../utils/campusEvents";
 
 export default function CalendarPage() {
   const today = new Date();
@@ -20,7 +22,7 @@ export default function CalendarPage() {
 
   useEffect(() => {
     const t = initializeMonth(loadTasks(), currentYear, currentMonth, DEFAULT_TASKS, planStart);
-    setTasks(syncFixedEvents(t, [...buildApplicationEvents(planStart), ...INTERVIEW_EVENTS], planStart));
+    setTasks(syncFixedEvents(t, [...buildApplicationEvents(planStart), ...INTERVIEW_EVENTS, ...FAIR_EVENTS, ...CAMPUS_EVENTS], planStart));
   }, [currentYear, currentMonth, planStart]);
 
   const handleRestartPlan = () => {
@@ -33,7 +35,7 @@ export default function CalendarPage() {
     setSelectedDate(start);
     // Re-run initialization even when the start date is unchanged
     const t = initializeMonth({}, now.getFullYear(), now.getMonth(), DEFAULT_TASKS, start);
-    setTasks(syncFixedEvents(t, [...buildApplicationEvents(start), ...INTERVIEW_EVENTS], start));
+    setTasks(syncFixedEvents(t, [...buildApplicationEvents(start), ...INTERVIEW_EVENTS, ...FAIR_EVENTS, ...CAMPUS_EVENTS], start));
     setPlanStart(start);
     showNotif("Plan restarted from today");
   };

@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { loadInternships, updateInternship, persistInternships, daysUntil, parseDate } from "../utils/internshipData";
 import { pullFromSheet, pushToSheet } from "../utils/sheetSync";
-import { CLASS_YEAR, FOCUS_AREAS, TARGET_ROLES, TARGET_INDUSTRIES, INTERN_FUNCTIONS, ROLE_SEARCH_BANK } from "../utils/careerProfile";
+import { PITCHES } from "../utils/careerFair";
+import { CAREER_LANES, CLASS_YEAR, FOCUS_AREAS, TARGET_ROLES, TARGET_INDUSTRIES, INTERN_FUNCTIONS, ROLE_SEARCH_BANK } from "../utils/careerProfile";
 
 const STATUS_OPTIONS = [
   { value: "not_started", label: "Not Started", color: "var(--text-dim)" },
@@ -99,7 +100,7 @@ export default function InternshipTracker() {
         if (categoryFilter !== "All" && i.category !== categoryFilter) return false;
         if (locRe && !locRe.test(i.location)) return false;
         if (statusFilter !== "All" && i.status !== statusFilter) return false;
-        if (q && ![i.company, i.role, i.keywords, i.function, i.industry].some((f) => f?.toLowerCase().includes(q))) return false;
+        if (q && ![i.company, i.role, i.keywords, i.function, i.industry, i.contact].some((f) => f?.toLowerCase().includes(q))) return false;
         return true;
       })
       .sort(compare);
@@ -244,6 +245,24 @@ export default function InternshipTracker() {
                 </div>
               ))}
             </div>
+            <div className="focus-lanes">
+              <div className="focus-label">Career lanes to explore</div>
+              <div className="focus-areas">
+                {CAREER_LANES.map((l) => (
+                  <div key={l.lane} className="focus-area">
+                    <div className="focus-area-name">{l.lane}</div>
+                    <div className="focus-area-topics">{l.roles.join(" → ")}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {PITCHES.map((pt) => (
+              <div key={pt.audience} className="focus-pitch">
+                <div className="focus-label">What to say — {pt.audience}</div>
+                <p>“{pt.text}”</p>
+                <div className="focus-chips">{pt.keywords.map((k) => <span key={k} className="focus-chip">{k}</span>)}</div>
+              </div>
+            ))}
             <div className="focus-search-bank">
               <div className="focus-label">Search these on Handshake &amp; careers pages</div>
               <div className="search-bank-grid">
@@ -341,6 +360,7 @@ export default function InternshipTracker() {
                       </span>
                       <span className="tracker-category-tag">{intern.category}</span>
                       <span className={`tracker-deadline due-${due.tone}`}>{due.label}</span>
+                      {intern.contact && <span className="tracker-contact">Met: {intern.contact}</span>}
                       {intern.followUp && (
                         <span className={`tracker-followup ${daysUntil(intern.followUp) <= 0 ? "due" : ""}`}>Follow up {formatDay(intern.followUp)}</span>
                       )}
