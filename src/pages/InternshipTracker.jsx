@@ -33,7 +33,7 @@ const LOCATION_FILTERS = {
 
 const EMPTY_EDIT = { appliedOn: "", followUp: "", contact: "", nextAction: "", notes: "" };
 
-const AM_RE = /account|client|partner|customer (success|development|business|management|solutions)|relationship|alliance|risk solutions/i;
+const AM_RE = /account|client|partner|customer (success|development|business|management|solutions|experience)|relationship|alliance|risk solutions|\bsales\b|distribution|cobrand/i;
 const isAccountRole = (i) => i.kind === "opening" && (AM_RE.test(i.role) || /account management|client/i.test(i.keywords || ""));
 
 const TIER_ORDER = { "Tier 1": 0, "Tier 2": 1, Explore: 2 };
