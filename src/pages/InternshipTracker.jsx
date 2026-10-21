@@ -32,6 +32,19 @@ const LOCATION_FILTERS = {
   "National / Multiple": /national|multiple|u\.s\.|united states|global|remote/i,
 };
 
+// isLive: still applicable (not closed, not past deadline, not flagged ineligible)
+const isLive = (i) => i.kind !== "opening" || (i.postingStatus !== "Closed" && i.eligibility !== "no" && (!i.deadline || daysUntil(i.deadline) >= 0));
+
+const DATE_FILTERS = {
+  "Any due date": () => true,
+  "Due in 7 days": (i) => i.deadline && daysUntil(i.deadline) <= 7,
+  "Due in 14 days": (i) => i.deadline && daysUntil(i.deadline) <= 14,
+  "Due in 30 days": (i) => i.deadline && daysUntil(i.deadline) <= 30,
+  "Due in 60 days": (i) => i.deadline && daysUntil(i.deadline) <= 60,
+  "Has a deadline": (i) => !!i.deadline,
+  "Rolling / no deadline": (i) => i.kind === "opening" && !i.deadline,
+};
+
 const EMPTY_EDIT = { appliedOn: "", followUp: "", contact: "", nextAction: "", notes: "" };
 
 const AM_RE = /account|client|partner|customer (success|development|business|management|solutions|experience)|relationship|alliance|risk solutions|\bsales\b|distribution|cobrand/i;
@@ -83,6 +96,8 @@ export default function InternshipTracker() {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [locationFilter, setLocationFilter] = useState("All Locations");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [dateFilter, setDateFilter] = useState("Any due date");
+  const [hidePast, setHidePast] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState(null);
   const [editing, setEditing] = useState(EMPTY_EDIT);
@@ -100,15 +115,17 @@ export default function InternshipTracker() {
         if (categoryFilter !== "All" && i.category !== categoryFilter) return false;
         if (locRe && !locRe.test(i.location)) return false;
         if (statusFilter !== "All" && i.status !== statusFilter) return false;
+        if (hidePast && !isLive(i)) return false;
+        if (!DATE_FILTERS[dateFilter](i)) return false;
         if (q && ![i.company, i.role, i.keywords, i.function, i.industry, i.contact].some((f) => f?.toLowerCase().includes(q))) return false;
         return true;
       })
       .sort(compare);
-  }, [internships, kindFilter, categoryFilter, locationFilter, statusFilter, searchQuery]);
+  }, [internships, kindFilter, categoryFilter, locationFilter, statusFilter, dateFilter, hidePast, searchQuery]);
 
   const stats = useMemo(() => {
     const openings = internships.filter((i) => i.kind === "opening");
-    const live = openings.filter((i) => i.postingStatus !== "Closed" && i.eligibility !== "no" && (!i.deadline || daysUntil(i.deadline) >= 0));
+    const live = openings.filter(isLive);
     const dueSoon = live.filter((i) => i.deadline && daysUntil(i.deadline) <= 7 && !DONE_STATUSES.includes(i.status)).length;
     const applied = internships.filter((i) => ["applied", "interviewing", "offer"].includes(i.status)).length;
     const interviewing = internships.filter((i) => i.status === "interviewing").length;
@@ -323,6 +340,15 @@ export default function InternshipTracker() {
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
+          <select className="section-select" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
+            {Object.keys(DATE_FILTERS).map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+          <label className="tracker-toggle">
+            <input type="checkbox" checked={hidePast} onChange={(e) => setHidePast(e.target.checked)} />
+            Hide closed / past due
+          </label>
           <span className="tracker-count">{filtered.length} shown</span>
         </div>
       </div>

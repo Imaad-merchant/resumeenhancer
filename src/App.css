@@ -1633,6 +1633,16 @@ body,
   flex-wrap: wrap;
 }
 
+.tracker-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .tracker-count {
   font-size: 12px;
   color: var(--text-muted);
