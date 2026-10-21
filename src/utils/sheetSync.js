@@ -71,6 +71,12 @@ function roleMatches(sheetRole, appRole) {
 /** Fetches the sheet and merges it into the internship list. Sheet values win. */
 export async function pullFromSheet(internships) {
   const { rows } = await call("GET");
+  if (!Array.isArray(rows)) {
+    // /api not served (e.g. static preview returning index.html)
+    const err = new Error("Google Sheet sync not set up");
+    err.notConfigured = true;
+    throw err;
+  }
   const byId = new Map(internships.map((i) => [String(i.id), i]));
   const used = new Set();
   const merged = new Map(internships.map((i) => [i.id, { ...i }]));
