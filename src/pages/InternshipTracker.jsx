@@ -28,7 +28,7 @@ const LOCATION_FILTERS = {
   Atlanta: /atlanta|alpharetta|peachtree|\bGA\b|georgia/i,
   Texas: /texas|\bTX\b|dallas|houston|austin|plano|westlake|addison|dfw|round rock/i,
   "New York": /nyc|new york|\bNY\b/i,
-  Chicago: /chicago|\bIL\b|bolingbrook/i,
+  Chicago: /chicago|\bIL\b|illinois|bolingbrook|schaumburg|rosemont|deerfield|evanston|lake forest/i,
   "National / Multiple": /national|multiple|u\.s\.|united states|global|remote/i,
 };
 
